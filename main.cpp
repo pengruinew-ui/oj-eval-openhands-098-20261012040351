@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <functional>
+#include <stack>
 
 using namespace std;
 
@@ -13,69 +13,56 @@ public:
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
-// Function to reconstruct BST from level order traversal
-// Assuming the input is a complete binary tree with 7 nodes
-TreeNode* buildBSTFromLevelOrder(const vector<int>& levelOrder) {
-    if (levelOrder.empty()) return nullptr;
-    
-    // Create nodes for all values
-    vector<TreeNode*> nodes;
-    for (int val : levelOrder) {
-        nodes.push_back(new TreeNode(val));
+// Function to insert a value into BST
+TreeNode* insertIntoBST(TreeNode* root, int val) {
+    if (!root) {
+        return new TreeNode(val);
     }
     
-    // Connect nodes based on complete binary tree structure
-    // For a node at index i:
-    // - Left child is at index 2*i + 1
-    // - Right child is at index 2*i + 2
-    for (int i = 0; i < 7; i++) {
-        int leftIndex = 2 * i + 1;
-        int rightIndex = 2 * i + 2;
-        
-        if (leftIndex < 7) {
-            nodes[i]->left = nodes[leftIndex];
-        }
-        
-        if (rightIndex < 7) {
-            nodes[i]->right = nodes[rightIndex];
-        }
+    if (val < root->val) {
+        root->left = insertIntoBST(root->left, val);
+    } else {
+        root->right = insertIntoBST(root->right, val);
     }
     
-    return nodes[0]; // Root is at index 0
+    return root;
 }
 
-// Function to find the cnt-th largest element in BST using reverse in-order traversal with counter
+// Function to find the cnt-th largest element in BST using iterative reverse in-order traversal
 int findKthLargest(TreeNode* root, int cnt) {
+    stack<TreeNode*> st;
+    TreeNode* current = root;
     int count = 0;
-    int result = -1;
     
-    // Helper function for reverse in-order traversal
-    function<void(TreeNode*)> reverseInorder = [&](TreeNode* node) {
-        if (!node || count >= cnt) return;
-        
-        // Visit right subtree first (larger values)
-        reverseInorder(node->right);
-        
-        // Visit root
-        count++;
-        if (count == cnt) {
-            result = node->val;
-            return;
+    while (current != nullptr || !st.empty()) {
+        // Go to the rightmost node
+        while (current != nullptr) {
+            st.push(current);
+            current = current->right;
         }
         
-        // Visit left subtree last (smaller values)
-        reverseInorder(node->left);
-    };
+        // Current is now nullptr, so pop from stack
+        current = st.top();
+        st.pop();
+        
+        // Process current node
+        count++;
+        if (count == cnt) {
+            return current->val;
+        }
+        
+        // Visit left subtree
+        current = current->left;
+    }
     
-    reverseInorder(root);
-    return result;
+    return -1; // Should not reach here if cnt is valid
 }
 
 int main() {
     vector<int> values(7);
     int cnt;
     
-    // Read 7 node values (level order traversal of BST)
+    // Read 7 node values
     for (int i = 0; i < 7; i++) {
         cin >> values[i];
     }
@@ -83,8 +70,11 @@ int main() {
     // Read cnt
     cin >> cnt;
     
-    // Reconstruct BST from level order traversal
-    TreeNode* root = buildBSTFromLevelOrder(values);
+    // Build BST by inserting values in the order they appear
+    TreeNode* root = nullptr;
+    for (int val : values) {
+        root = insertIntoBST(root, val);
+    }
     
     // Find and output the cnt-th largest element
     cout << findKthLargest(root, cnt) << endl;
