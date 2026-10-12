@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
+#include <queue>
 
 using namespace std;
 
@@ -13,16 +13,41 @@ public:
     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
 };
 
-// Function to insert a value into BST
-TreeNode* insertIntoBST(TreeNode* root, int val) {
-    if (!root) {
-        return new TreeNode(val);
-    }
+// Function to reconstruct BST from level order traversal
+TreeNode* buildBSTFromLevelOrder(const vector<int>& levelOrder) {
+    if (levelOrder.empty()) return nullptr;
     
-    if (val < root->val) {
-        root->left = insertIntoBST(root->left, val);
-    } else {
-        root->right = insertIntoBST(root->right, val);
+    // Create root from first element
+    TreeNode* root = new TreeNode(levelOrder[0]);
+    
+    // Use queue to process nodes in level order
+    queue<TreeNode*> q;
+    q.push(root);
+    
+    int i = 1; // Index for levelOrder array
+    while (!q.empty() && i < levelOrder.size()) {
+        TreeNode* current = q.front();
+        q.pop();
+        
+        // Process left child
+        if (i < levelOrder.size()) {
+            // In a BST, left child should be less than parent
+            if (levelOrder[i] < current->val) {
+                current->left = new TreeNode(levelOrder[i]);
+                q.push(current->left);
+            }
+            i++;
+        }
+        
+        // Process right child
+        if (i < levelOrder.size()) {
+            // In a BST, right child should be greater than parent
+            if (levelOrder[i] > current->val) {
+                current->right = new TreeNode(levelOrder[i]);
+                q.push(current->right);
+            }
+            i++;
+        }
     }
     
     return root;
@@ -50,7 +75,7 @@ int main() {
     vector<int> values(7);
     int cnt;
     
-    // Read 7 node values
+    // Read 7 node values (level order traversal of BST)
     for (int i = 0; i < 7; i++) {
         cin >> values[i];
     }
@@ -58,18 +83,11 @@ int main() {
     // Read cnt
     cin >> cnt;
     
-    // Build BST from the input values
-    TreeNode* root = nullptr;
-    for (int val : values) {
-        root = insertIntoBST(root, val);
-    }
+    // Reconstruct BST from level order traversal
+    TreeNode* root = buildBSTFromLevelOrder(values);
     
     // Find and output the cnt-th largest element
     cout << findKthLargest(root, cnt) << endl;
-    
-    // Clean up memory (optional for this problem)
-    // In a real application, you'd want to properly delete the tree
-    // For this problem, it's not strictly necessary as the program ends
     
     return 0;
 }
