@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <queue>
 
 using namespace std;
 
@@ -14,50 +13,34 @@ public:
 };
 
 // Function to reconstruct BST from level order traversal
+// Assuming the input is a complete binary tree with 7 nodes
 TreeNode* buildBSTFromLevelOrder(const vector<int>& levelOrder) {
     if (levelOrder.empty()) return nullptr;
     
-    // Create root from first element
-    TreeNode* root = new TreeNode(levelOrder[0]);
+    // Create nodes for all values
+    vector<TreeNode*> nodes;
+    for (int val : levelOrder) {
+        nodes.push_back(new TreeNode(val));
+    }
     
-    // Use queue to store nodes at current level
-    queue<TreeNode*> q;
-    q.push(root);
-    
-    int i = 1; // Index for levelOrder array
-    while (!q.empty() && i < levelOrder.size()) {
-        int size = q.size();
+    // Connect nodes based on complete binary tree structure
+    // For a node at index i:
+    // - Left child is at index 2*i + 1
+    // - Right child is at index 2*i + 2
+    for (int i = 0; i < 7; i++) {
+        int leftIndex = 2 * i + 1;
+        int rightIndex = 2 * i + 2;
         
-        // Process all nodes at current level
-        for (int j = 0; j < size && i < levelOrder.size(); j++) {
-            TreeNode* current = q.front();
-            q.pop();
-            
-            // Add left child if it exists and is less than parent
-            if (i < levelOrder.size()) {
-                int leftVal = levelOrder[i];
-                // In BST, left child must be less than parent
-                if (leftVal < current->val) {
-                    current->left = new TreeNode(leftVal);
-                    q.push(current->left);
-                }
-                i++;
-            }
-            
-            // Add right child if it exists and is greater than parent
-            if (i < levelOrder.size()) {
-                int rightVal = levelOrder[i];
-                // In BST, right child must be greater than parent
-                if (rightVal > current->val) {
-                    current->right = new TreeNode(rightVal);
-                    q.push(current->right);
-                }
-                i++;
-            }
+        if (leftIndex < 7) {
+            nodes[i]->left = nodes[leftIndex];
+        }
+        
+        if (rightIndex < 7) {
+            nodes[i]->right = nodes[rightIndex];
         }
     }
     
-    return root;
+    return nodes[0]; // Root is at index 0
 }
 
 // Function to perform reverse in-order traversal to get values in descending order
