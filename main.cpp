@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -43,22 +44,31 @@ TreeNode* buildBSTFromLevelOrder(const vector<int>& levelOrder) {
     return nodes[0]; // Root is at index 0
 }
 
-// Function to perform reverse in-order traversal to get values in descending order
-void reverseInorder(TreeNode* root, vector<int>& result) {
-    if (!root) return;
-    
-    reverseInorder(root->right, result);  // Visit right subtree first (larger values)
-    result.push_back(root->val);           // Visit root
-    reverseInorder(root->left, result);    // Visit left subtree last (smaller values)
-}
-
-// Function to find the cnt-th largest element in BST
+// Function to find the cnt-th largest element in BST using reverse in-order traversal with counter
 int findKthLargest(TreeNode* root, int cnt) {
-    vector<int> values;
-    reverseInorder(root, values);
+    int count = 0;
+    int result = -1;
     
-    // Return the cnt-th largest element (1-indexed)
-    return values[cnt - 1];
+    // Helper function for reverse in-order traversal
+    function<void(TreeNode*)> reverseInorder = [&](TreeNode* node) {
+        if (!node || count >= cnt) return;
+        
+        // Visit right subtree first (larger values)
+        reverseInorder(node->right);
+        
+        // Visit root
+        count++;
+        if (count == cnt) {
+            result = node->val;
+            return;
+        }
+        
+        // Visit left subtree last (smaller values)
+        reverseInorder(node->left);
+    };
+    
+    reverseInorder(root);
+    return result;
 }
 
 int main() {
