@@ -20,33 +20,40 @@ TreeNode* buildBSTFromLevelOrder(const vector<int>& levelOrder) {
     // Create root from first element
     TreeNode* root = new TreeNode(levelOrder[0]);
     
-    // Use queue to process nodes in level order
+    // Use queue to store nodes at current level
     queue<TreeNode*> q;
     q.push(root);
     
     int i = 1; // Index for levelOrder array
     while (!q.empty() && i < levelOrder.size()) {
-        TreeNode* current = q.front();
-        q.pop();
+        int size = q.size();
         
-        // Process left child
-        if (i < levelOrder.size()) {
-            // In a BST, left child should be less than parent
-            if (levelOrder[i] < current->val) {
-                current->left = new TreeNode(levelOrder[i]);
-                q.push(current->left);
+        // Process all nodes at current level
+        for (int j = 0; j < size && i < levelOrder.size(); j++) {
+            TreeNode* current = q.front();
+            q.pop();
+            
+            // Add left child if it exists and is less than parent
+            if (i < levelOrder.size()) {
+                int leftVal = levelOrder[i];
+                // In BST, left child must be less than parent
+                if (leftVal < current->val) {
+                    current->left = new TreeNode(leftVal);
+                    q.push(current->left);
+                }
+                i++;
             }
-            i++;
-        }
-        
-        // Process right child
-        if (i < levelOrder.size()) {
-            // In a BST, right child should be greater than parent
-            if (levelOrder[i] > current->val) {
-                current->right = new TreeNode(levelOrder[i]);
-                q.push(current->right);
+            
+            // Add right child if it exists and is greater than parent
+            if (i < levelOrder.size()) {
+                int rightVal = levelOrder[i];
+                // In BST, right child must be greater than parent
+                if (rightVal > current->val) {
+                    current->right = new TreeNode(rightVal);
+                    q.push(current->right);
+                }
+                i++;
             }
-            i++;
         }
     }
     
